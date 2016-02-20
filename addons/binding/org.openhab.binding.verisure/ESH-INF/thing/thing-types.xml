@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing:thing-descriptions bindingId="verisure"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:thing="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0"
+        xsi:schemaLocation="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0 http://eclipse.org/smarthome/schemas/thing-description-1.0.0.xsd">
+
+    <!-- Sample Thing Type -->
+    <bridge-type id="bridge">
+        <label>Verisure Binding</label>
+        <description>This bridge represents the mypages.verisure.com webpage connector</description>
+
+        <channels>
+            <channel id="alarmstatus" typeId="alarmstatus"/>
+            <channel id="alarmstatusnumeric" typeId="alarmstatus"/>
+            <channel id="alarmstatuslocalized" typeId="alarmstatuslocalized"/>
+            <channel id="alarmtimestamp" typeId="alarmtimestamp"/>
+            <channel id="alarmchangername" typeId="alarmchangername"/>
+            <channel id="setalarmstatus" typeId="setalarmstatus"/>
+            
+        </channels>
+        
+       <config-description>
+            <parameter name="authstring" type="text" required="true">
+                <label>Authentication String</label>
+                <context>password</context>
+                <description>String to POST for authentication to mypage.verisure.com
+                </description>
+            </parameter>
+            <parameter name="refresh" type="integer">
+                <label>Refresh interval</label>
+                <description>Specifies the refresh interval in seconds.</description>
+                <default>60</default>
+            </parameter>
+            
+           <parameter name="pin" type="integer">
+                <label>Pin Code</label>
+                <description>If you want to turn off and on the alarm from the Binding, enter pin-code here.</description>
+                <context>password</context>
+            </parameter>
+        </config-description>
+        
+    </bridge-type>
+    
+    
+    
+    
+    <thing-type id="climatesensor">
+        <supported-bridge-type-refs>
+            <bridge-type-ref id="bridge" />
+        </supported-bridge-type-refs>
+
+        <label>Climate Sensor</label>
+        <description>A climate sensor in a Smoke detector, x-box or ?? </description>
+
+        <channels>
+            <channel id="temperature" typeId="temperature" />
+            <channel id="humidity" typeId="humidity" />
+            <channel id="lastupdate" typeId="lastupdate" />
+            <channel id="location" typeId="location" />
+        </channels>
+
+        <properties>
+            <property name="vendor">Verisure</property>
+        </properties>
+
+  
+    </thing-type>
+
+
+
+
+
+
+    
+    
+ 
+     <channel-type id="alarmstatus">
+        <item-type>String</item-type>
+        <label>Current Alarm Status</label>
+        <description>Current Alarm Status Channel</description>
+    </channel-type>
+    
+         <channel-type id="alarmstatusnumeric">
+        <item-type>Number</item-type>
+        <label>Current Alarm Status Numeric</label>
+        <description>Current Alarm Status Numeric Channel</description>
+    </channel-type>
+    
+         <channel-type id="alarmstatuslocalized">
+        <item-type>String</item-type>
+        <label>Current Alarm Status - Localized</label>
+        <description>Current Alarm Status Localized Channel</description>
+    </channel-type>
+    
+         <channel-type id="alarmtimestamp">
+        <item-type>String</item-type>
+        <label>Time changed</label>
+        <description>Alarm Status Change Timestamp Channel</description>
+    </channel-type>
+    
+         <channel-type id="alarmchangername">
+        <item-type>String</item-type>
+        <label>Alarm Operated By</label>
+        <description>Alarm Operated By Channel</description>
+    </channel-type>
+    
+    
+    
+    <channel-type id="setalarmstatus">
+        <item-type>Number</item-type>
+        <label>set alarm status</label>
+        <description>sets the alarm status..</description>
+        <state>
+            <options>
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+
+            </options>
+        </state>
+    </channel-type>
+    
+
+      <channel-type id="temperature">
+        <item-type>Number</item-type>
+        <label>Temperature</label>
+        <description>Current temperature in degrees celsius</description>
+        <category>Temperature</category>
+        <state readOnly="true" pattern="%.1f °C">
+        </state>
+    </channel-type>
+    
+    <channel-type id="humidity">
+        <item-type>Number</item-type>
+        <label>Humidity</label>
+        <description>Current humidity in %</description>
+        <category>Humidity</category>
+        <state readOnly="true" pattern="%d %%">
+        </state>
+    </channel-type>
+    
+        <channel-type id="lastupdate">
+        <item-type>String</item-type>
+        <label>lastupdate</label>
+        <description>Last timestmap</description>
+        <state readOnly="true">
+        </state>
+    </channel-type>
+    
+    <channel-type id="location">
+        <item-type>String</item-type>
+        <label>location</label>
+        <description>location</description>
+        <state readOnly="true">
+        </state>
+    </channel-type>
+    
+</thing:thing-descriptions>
