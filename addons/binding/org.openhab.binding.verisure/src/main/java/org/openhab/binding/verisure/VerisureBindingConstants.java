@@ -49,8 +49,4 @@ public class VerisureBindingConstants {
     public static final String CLIMATEDATA_PATH = "/overview/climatedevice?_=";
     public static final String SMARTPLUGDATA_PATH = "/overview/smartplug?_=";
 
-    // alarmFields: [ 'status', 'date' ],
-    // climateFields: [ 'location', 'humidity', 'temperature', 'timestamp' ],
-    // smartplugFields: [ 'status', 'statusText', 'location', 'usage', 'usageText']
-
 }

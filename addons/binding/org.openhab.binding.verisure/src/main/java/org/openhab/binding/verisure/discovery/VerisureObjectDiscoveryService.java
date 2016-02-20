@@ -110,22 +110,8 @@ public class VerisureObjectDiscoveryService extends AbstractDiscoveryService imp
         ThingUID bridgeUID = verisureBridgeHandler.getThing().getUID();
         ThingTypeUID thingTypeUID = new ThingTypeUID(BINDING_ID, voj.getModelID());
 
-        // logger.debug("BINDING_ID: " + BINDING_ID);
-        logger.debug("-----");
-        logger.debug("-----");
-        logger.debug("-----");
-        logger.debug("-----");
-        logger.debug("BINDING_ID: " + BINDING_ID);
-        logger.debug("voj.getmodelid: " + voj.getModelID());
-        logger.debug("thingtypeuid: " + thingTypeUID);
-
-        logger.debug("thingTypeUID: " + thingTypeUID);
-
-        logger.debug("moomo: " + voj.getId().replaceAll("[^a-zA-Z0-9_]", "_"));
         ThingUID tuid = new ThingUID(thingTypeUID, bridgeUID, voj.getId().replaceAll("[^a-zA-Z0-9_]", "_"));
-        logger.debug("thingTypeUID3: " + thingTypeUID);
 
-        logger.debug("Returning: " + tuid);
         return tuid;
     }
 
