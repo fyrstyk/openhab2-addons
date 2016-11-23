@@ -23,13 +23,15 @@ Depending on your Tellstick model different API methods is available:
 <tr><td>Tellstick Duo</td><td>X</td><td>X</td><td>X</td></tr>
 <tr><td>Tellstick Net</td><td></td><td>X</td></tr>
 <tr><td>Tellstick ZNet Lite</td><td></td><td>X</td></tr>
-<tr><td>Tellstick ZNet Pro</td><td></td><td>X</td></tr>
+<tr><td>Tellstick ZNet Pro</td><td></td><td>X</td><td>X</td></tr>
 </table>
 
 
 This binding supports the following thing types:
 
-TBD
+Sensor
+On/Off Device
+Dimmable Device
 
 ## Binding Configuration
 
@@ -37,11 +39,12 @@ No binding configuration required.
 
 ## Discovery
 
-TBD
+Both Telldus Core and Live devices will be discovered once the bridges are configured.
 
 ## Thing Configuration
 
-TBD
+Bridge tellstick:telldus-core:1 "Tellstick Duo" []
+Bridge tellstick:telldus-live:2 "Tellstick ZWave" [publicKey="XXX", privateKey="YYYY", token= "ZZZZ", tokenSecret="UUUU"]
 
 ## Channels
 
