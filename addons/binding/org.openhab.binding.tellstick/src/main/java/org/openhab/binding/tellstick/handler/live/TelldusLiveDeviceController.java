@@ -77,7 +77,11 @@ public class TelldusLiveDeviceController implements DeviceChangeListener, Sensor
 
     @Override
     public void dispose() {
-        client.closeAsynchronously();
+        try {
+            client.close();
+        } catch (Exception e) {
+            logger.error("Failed to close client", e);
+        }
     }
 
     void connectHttpClient(String publicKey, String privateKey, String token, String tokenSecret) {
