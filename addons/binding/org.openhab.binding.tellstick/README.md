@@ -42,10 +42,10 @@ No binding configuration required.
 Both Telldus Core and Live devices will be discovered once the bridges are configured.
 
 ## Thing Configuration
-
+```
 Bridge tellstick:telldus-core:1 "Tellstick Duo" []
 Bridge tellstick:telldus-live:2 "Tellstick ZWave" [publicKey="XXX", privateKey="YYYY", token= "ZZZZ", tokenSecret="UUUU"]
-
+```
 ## Channels
 
 TBD
