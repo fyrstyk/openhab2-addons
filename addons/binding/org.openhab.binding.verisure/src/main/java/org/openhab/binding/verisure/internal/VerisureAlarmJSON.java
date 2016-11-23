@@ -21,7 +21,7 @@ public class VerisureAlarmJSON {
     private Boolean changeAllowed;
     @SerializedName("id")
     @Expose
-    private Integer id;
+    private String id;
     @SerializedName("label")
     @Expose
     private String label;
@@ -31,6 +31,10 @@ public class VerisureAlarmJSON {
     @SerializedName("status")
     @Expose
     private String status;
+
+      @SerializedName("location")
+    @Expose
+    private String location;
 
     /**
      *
@@ -109,7 +113,7 @@ public class VerisureAlarmJSON {
      * @return
      *         The id
      */
-    public Integer getId() {
+    public String getId() {
         return id;
     }
 
@@ -118,7 +122,7 @@ public class VerisureAlarmJSON {
      * @param id
      *            The id
      */
-    public void setId(Integer id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -175,5 +179,13 @@ public class VerisureAlarmJSON {
     public void setStatus(String status) {
         this.status = status;
     }
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
 
 }

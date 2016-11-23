@@ -141,7 +141,7 @@ public class VerisureBridgeHandler extends BaseBridgeHandler {
 
         if (refresh == null) {
             // let's go for the default
-            refresh = new BigDecimal(60);
+            refresh = new BigDecimal(600);
         }
 
         // Get auth string

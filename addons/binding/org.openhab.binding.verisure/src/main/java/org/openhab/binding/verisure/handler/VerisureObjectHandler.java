@@ -10,8 +10,10 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.smarthome.core.library.types.DecimalType;
 import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.thing.Thing;
+import org.eclipse.smarthome.core.thing.Bridge;
 import org.eclipse.smarthome.core.thing.ThingStatus;
 import org.eclipse.smarthome.core.thing.ThingTypeUID;
+import org.eclipse.smarthome.core.thing.binding.ThingHandler;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.eclipse.smarthome.core.types.Command;
 import org.openhab.binding.verisure.internal.VerisureObjectJSON;
@@ -63,6 +65,10 @@ public class VerisureObjectHandler extends BaseThingHandler {
     public void initialize() {
         super.initialize();
 
+        
+
+    }
+    public void bridgeHandlerInitialized(ThingHandler thingHandler, Bridge bridge) {
         VerisureBridgeHandler vbh = (VerisureBridgeHandler) this.getBridge().getHandler();
         session = vbh.getSession();
 
@@ -71,9 +77,7 @@ public class VerisureObjectHandler extends BaseThingHandler {
         refresh = new BigDecimal(60);
 
         refreshJob = scheduler.scheduleAtFixedRate(pollingRunnable, 10, refresh.intValue(), TimeUnit.SECONDS);
-
     }
-
     public synchronized void update() {
         logger.debug("VerisureObjectHandler:update()");
 

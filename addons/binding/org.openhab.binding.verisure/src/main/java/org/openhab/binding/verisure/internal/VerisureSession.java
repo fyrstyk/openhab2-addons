@@ -13,6 +13,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import org.eclipse.smarthome.core.library.types.DecimalType;
 import org.eclipse.smarthome.core.library.types.StringType;
@@ -74,7 +75,7 @@ public class VerisureSession {
             VerisureObjectJSON cse = gson.fromJson(obj, VerisureObjectJSON.class);
             cse.setId(cse.getId().replaceAll("[^a-zA-Z0-9_]", "_"));
             lcs.add(cse);
-            System.out.println(cse.getId());
+            logger.debug(cse.getId());
             verisureObjects.put(cse.getId(), cse);
 
             // Should probably check if any of the items have been updated and notify caller
@@ -155,17 +156,21 @@ public class VerisureSession {
 
         // Trim JSON
         // Should replace with Jsonarrar/jsonparser
-        result = result.substring(1, result.length() - 1);
+        //result = result.substring(1, result.length() - 1);
 
         // Print in Console
-        VerisureAlarmJSON jsonObject = gson.fromJson(result, VerisureAlarmJSON.class);
+        VerisureAlarmJSON[] jsonObjects = gson.fromJson(result, VerisureAlarmJSON[].class);
+        for (VerisureAlarmJSON object:jsonObjects) {
+            if (object.getType().equals("ARM_STATE")) {
+                alarmData = object;
+            }
+        }
 
-        alarmData = jsonObject;
     }
 
     public String httpGet(String urlString) {
 
-        System.out.println("httpGetURL: " + urlString);
+        logger.debug("httpGetURL: " + urlString);
         String json = null;
 
         try {
@@ -174,26 +179,26 @@ public class VerisureSession {
             InputStream in = conn.getInputStream();
             BufferedReader reader = new BufferedReader(new InputStreamReader(in));
             int status = conn.getResponseCode();
-            System.out.println("Status = " + status);
+            logger.debug("Status = " + status);
             // String key;
-            // System.out.println("Headers-------start-----");
+            // logger.debug("Headers-------start-----");
             // for (int i = 1; (key = conn.getHeaderFieldKey(i)) != null; i++) {
-            // System.out.println(key + ":" + conn.getHeaderField(i));
+            // logger.debug(key + ":" + conn.getHeaderField(i));
             // }
-            // System.out.println("Headers-------end-----");
-            System.out.println("Content-------start-----");
+            // logger.debug("Headers-------end-----");
+            logger.debug("Content-------start-----");
             String inputLine;
             json = "";
 
             while ((inputLine = reader.readLine()) != null) {
-                // System.out.println(inputLine);
+                // logger.debug(inputLine);
                 json += inputLine;
             }
-            // System.out.println("Content-------end-----");
-            System.out.println(json);
+            // logger.debug("Content-------end-----");
+            logger.debug(json);
             in.close();
         } catch (Exception e) {
-            System.out.println(e);
+            logger.error("Failed when talking to myverisure", e);
         }
 
         return json;
@@ -206,7 +211,7 @@ public class VerisureSession {
         String url = BASEURL + LOGON_SUF;
         String source = sendHTTPpost(url, authstring);
 
-        // System.out.println(source);
+        // logger.debug(source);
 
         url = BASEURL + START_SUF;
         source = httpGet(url);
@@ -240,19 +245,19 @@ public class VerisureSession {
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(in));
             // int status = conn.getResponseCode();
-            // System.out.println("Status = " + status);
+            // logger.debug("Status = " + status);
             // String key;
-            // System.out.println("Headers-------start-----");
+            // logger.debug("Headers-------start-----");
             // for (int i = 1; (key = conn.getHeaderFieldKey(i)) != null; i++) {
-            // System.out.println(key + ":" + conn.getHeaderField(i));
+            // logger.debug(key + ":" + conn.getHeaderField(i));
             // }
-            // System.out.println("Headers-------end-----");
-            System.out.println("Content-------start-----");
+            // logger.debug("Headers-------end-----");
+            logger.debug("Content-------start-----");
             String inputLine;
             while ((inputLine = reader.readLine()) != null) {
-                System.out.println(inputLine);
+                logger.debug(inputLine);
             }
-            System.out.println("Content-------end-----");
+            logger.debug("Content-------end-----");
             in.close();
 
             return inputLine;
@@ -288,19 +293,19 @@ public class VerisureSession {
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(in));
             // int status = conn.getResponseCode();
-            // System.out.println("Status = " + status);
+            // logger.debug("Status = " + status);
             // String key;
-            // System.out.println("Headers-------start-----");
+            // logger.debug("Headers-------start-----");
             // for (int i = 1; (key = conn.getHeaderFieldKey(i)) != null; i++) {
-            // System.out.println(key + ":" + conn.getHeaderField(i));
+            // logger.debug(key + ":" + conn.getHeaderField(i));
             // }
-            // System.out.println("Headers-------end-----");
-            System.out.println("Content-------start-----");
+            // logger.debug("Headers-------end-----");
+            logger.debug("Content-------start-----");
             String inputLine;
             while ((inputLine = reader.readLine()) != null) {
-                System.out.println(inputLine);
+                logger.debug(inputLine);
             }
-            System.out.println("Content-------end-----");
+            logger.debug("Content-------end-----");
             in.close();
 
             return inputLine;
@@ -347,7 +352,7 @@ public class VerisureSession {
             }
 
         } catch (Exception e) {
-            System.out.println("Error:" + e);
+            logger.debug("Error:" + e);
         }
 
         return false;
