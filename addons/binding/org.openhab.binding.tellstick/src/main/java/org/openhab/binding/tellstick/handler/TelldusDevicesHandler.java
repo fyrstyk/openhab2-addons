@@ -125,10 +125,6 @@ public class TelldusDevicesHandler extends BaseThingHandler
         final Object configDeviceId = config.get(TellstickBindingConstants.DEVICE_ID);
         if (configDeviceId != null) {
             deviceId = configDeviceId.toString();
-        }
-        if (deviceId != null) {
-            logger.debug("Initialized TellStick device handler for {}.", deviceId);
-            updateStatus(ThingStatus.OFFLINE);
         } else {
             logger.debug("Initialized TellStick device missing serialNumber configuration... troubles ahead");
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR);
@@ -142,8 +138,7 @@ public class TelldusDevicesHandler extends BaseThingHandler
             resend = repeatCount.intValue();
         }
     }
-
-    @Override
+    
     public void bridgeHandlerInitialized(ThingHandler thingHandler, Bridge bridge) {
         try {
             TelldusBridgeHandler tellHandler = (TelldusBridgeHandler) thingHandler;
@@ -170,15 +165,7 @@ public class TelldusDevicesHandler extends BaseThingHandler
                     logger.warn("Could not find {}, please make sure it is defined and that telldus service is running",
                             deviceId);
                     updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR);
-                }
-                /**
-                 * Copyright (c) 2016 openHAB UG (haftungsbeschraenkt) and others.
-                 *
-                 * All rights reserved. This program and the accompanying materials
-                 * are made available under the terms of the Eclipse Public License v1.0
-                 * which accompanies this distribution, and is available at
-                 * http://www.eclipse.org/legal/epl-v10.html
-                 */
+                }               
             }
         } catch (Exception e) {
             logger.error("Failed to init bridge for " + deviceId, e);
@@ -214,8 +201,7 @@ public class TelldusDevicesHandler extends BaseThingHandler
             }
         }
     }
-
-    @Override
+    
     public void bridgeHandlerDisposed(ThingHandler thingHandler, Bridge bridge) {
         logger.info("Bridge disposed for {}", getThing().getUID());
     }
