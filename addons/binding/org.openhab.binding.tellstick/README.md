@@ -29,9 +29,9 @@ Depending on your Tellstick model different API methods is available:
 
 This binding supports the following thing types:
 
-Sensor
-On/Off Device
-Dimmable Device
+* Sensor
+* On/Off Device
+* Dimmable Device
 
 ## Binding Configuration
 
