@@ -58,7 +58,7 @@
     <module>org.openhab.binding.toon</module>
     <module>org.openhab.binding.urtsi</module>
     <module>org.openhab.binding.vitotronic</module>
-    <module>org.openhab.binding.zwave</module>
+    <!--module>org.openhab.binding.zwave</module-->
     <module>org.openhab.binding.tellstick</module>
     <module>org.openhab.binding.yamahareceiver</module>
   </modules>
