@@ -11,34 +11,34 @@ import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.eclipse.smarthome.core.library.types.DecimalType;
 import org.eclipse.smarthome.core.library.types.StringType;
 import org.eclipse.smarthome.core.types.State;
 import org.eclipse.smarthome.core.types.UnDefType;
-import org.openhab.binding.verisure.handler.VerisureBridgeHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
 
 public class VerisureSession {
-    private HashMap<String, VerisureObjectJSON> verisureObjects = new HashMap<String, VerisureObjectJSON>();
+    private HashMap<String, VerisureBaseObjectJSON> verisureObjects = new HashMap<String, VerisureBaseObjectJSON>();
 
-    private Logger logger = LoggerFactory.getLogger(VerisureBridgeHandler.class);
+    private Logger logger = LoggerFactory.getLogger(VerisureSession.class);
     private String authstring;
     private String csrf;
 
     private VerisureAlarmJSON alarmData = null;
     private CookieManager cm = new CookieManager();
-    Gson gson = new GsonBuilder().create();
+    private Gson gson = new GsonBuilder().create();
+
+    private VerisureAlarmJSON doorData;
+
+    private List<DeviceStatusListener> deviceStatusListeners = new CopyOnWriteArrayList<>();
 
     public void initialize(String _authstring) {
         logger.debug("VerisureSession:initialize");
@@ -55,8 +55,12 @@ public class VerisureSession {
 
     private void updateStatus() {
         logger.debug("VerisureSession:updateStatus");
-        updateAlarmStatus();
-        updateVerisureObjects();
+        try {
+            updateAlarmStatus();
+            updateVerisureObjects();
+        } catch (RuntimeException e) {
+            logger.error("Failed in updatestatus", e);
+        }
     }
 
     public synchronized void updateVerisureObjects() {
@@ -64,29 +68,33 @@ public class VerisureSession {
 
         // Get JSON
         String result = httpGet(BASEURL + CLIMATEDATA_PATH);
-
-        Gson gson = new GsonBuilder().create();
-        JsonParser parser = new JsonParser();
-        JsonArray jArray = parser.parse(result).getAsJsonArray();
-
-        ArrayList<VerisureObjectJSON> lcs = new ArrayList<VerisureObjectJSON>();
-
-        for (JsonElement obj : jArray) {
-            VerisureObjectJSON cse = gson.fromJson(obj, VerisureObjectJSON.class);
+        logger.debug("Data:" + result);
+        VerisureSensorJSON[] sensors = gson.fromJson(result, VerisureSensorJSON[].class);
+        logger.debug("Sensor:" + sensors);
+        for (VerisureSensorJSON cse : sensors) {
             cse.setId(cse.getId().replaceAll("[^a-zA-Z0-9_]", "_"));
-            lcs.add(cse);
             logger.debug(cse.getId());
-            verisureObjects.put(cse.getId(), cse);
+            VerisureBaseObjectJSON oldObj = verisureObjects.get(cse.getId());
+            if (oldObj == null || oldObj.equals(cse)) {
+                verisureObjects.put(cse.getId(), cse);
+                notifyListeners(cse);
+            }
 
             // Should probably check if any of the items have been updated and notify caller
         }
     }
 
-    public VerisureObjectJSON getVerisureObject(String serialNumber) {
+    private void notifyListeners(VerisureBaseObjectJSON cse) {
+        for (DeviceStatusListener listener : deviceStatusListeners) {
+            listener.onDeviceStateChanged(cse);
+        }
+    }
+
+    public VerisureBaseObjectJSON getVerisureObject(String serialNumber) {
         return verisureObjects.get(serialNumber);
     }
 
-    public HashMap<String, VerisureObjectJSON> getVerisureObjects() {
+    public HashMap<String, VerisureBaseObjectJSON> getVerisureObjects() {
         return verisureObjects;
     }
 
@@ -156,16 +164,33 @@ public class VerisureSession {
 
         // Trim JSON
         // Should replace with Jsonarrar/jsonparser
-        //result = result.substring(1, result.length() - 1);
+        // result = result.substring(1, result.length() - 1);
 
         // Print in Console
         VerisureAlarmJSON[] jsonObjects = gson.fromJson(result, VerisureAlarmJSON[].class);
-        for (VerisureAlarmJSON object:jsonObjects) {
+        for (VerisureAlarmJSON object : jsonObjects) {
             if (object.getType().equals("ARM_STATE")) {
-                alarmData = object;
+                setAlarmData(object);
+            } else if (object.getType().equals("DOOR_LOCK")) {
+                setDoorData(object);
             }
         }
 
+    }
+
+    private void setAlarmData(VerisureAlarmJSON object) {
+        if (!object.equals(alarmData)) {
+            this.alarmData = object;
+            notifyListeners(alarmData);
+        }
+    }
+
+    private void setDoorData(VerisureAlarmJSON object) {
+        if (!object.equals(doorData)) {
+            this.doorData = object;
+            this.verisureObjects.put(doorData.getId(), this.doorData);
+            notifyListeners(doorData);
+        }
     }
 
     public String httpGet(String urlString) {
@@ -234,54 +259,6 @@ public class VerisureSession {
                 conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
                 conn.setRequestProperty("Accept", "application/json");
             }
-
-            DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
-
-            wr.writeBytes(data);
-            wr.flush();
-            wr.close();
-
-            InputStream in = conn.getInputStream();
-
-            BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-            // int status = conn.getResponseCode();
-            // logger.debug("Status = " + status);
-            // String key;
-            // logger.debug("Headers-------start-----");
-            // for (int i = 1; (key = conn.getHeaderFieldKey(i)) != null; i++) {
-            // logger.debug(key + ":" + conn.getHeaderField(i));
-            // }
-            // logger.debug("Headers-------end-----");
-            logger.debug("Content-------start-----");
-            String inputLine;
-            while ((inputLine = reader.readLine()) != null) {
-                logger.debug(inputLine);
-            }
-            logger.debug("Content-------end-----");
-            in.close();
-
-            return inputLine;
-        } catch (Exception e) {
-            logger.debug("had an exception" + e.toString());
-        }
-        return null;
-    }
-
-    private String sendHTTPpostAfterLogin1(String urlString, String data) {
-
-        logger.debug("posting data to url: " + urlString);
-        logger.debug("posting hte data: " + data);
-        try {
-            URL url = new URL(urlString);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-
-            conn.setRequestProperty("x-csrf-token", csrf);
-
-            conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
-            conn.setRequestProperty("Accept", "application/json");
-
-            conn.setRequestMethod("POST");
-            conn.setDoOutput(true);
 
             DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
 
@@ -428,4 +405,43 @@ public class VerisureSession {
         sendHTTPpost(url, data);
         return true;
     }
+
+    public VerisureAlarmJSON getDoorStatus() {
+        // TODO Auto-generated method stub
+        return doorData;
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.openhab.binding.tellstick.handler.TelldusBridgeHandlerIntf#registerDeviceStatusListener(org.openhab.binding.
+     * tellstick.handler.DeviceStatusListener)
+     */
+    public boolean registerDeviceStatusListener(DeviceStatusListener deviceStatusListener) {
+        if (deviceStatusListener == null) {
+            throw new NullPointerException("It's not allowed to pass a null deviceStatusListener.");
+        }
+        boolean result = deviceStatusListeners.add(deviceStatusListener);
+        if (result) {
+            // onUpdate();
+        }
+        return result;
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.openhab.binding.tellstick.handler.TelldusBridgeHandlerIntf#unregisterDeviceStatusListener(org.openhab.binding
+     * .tellstick.handler.DeviceStatusListener)
+     */
+    public boolean unregisterDeviceStatusListener(DeviceStatusListener deviceStatusListener) {
+        boolean result = deviceStatusListeners.remove(deviceStatusListener);
+        if (result) {
+            // onUpdate();
+        }
+        return result;
+    }
+
 }

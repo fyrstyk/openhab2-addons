@@ -17,6 +17,7 @@ import org.eclipse.smarthome.core.thing.ThingTypeUID;
  */
 public class VerisureBindingConstants {
 
+    public static final String DOOR = "door";
     public static final String BINDING_ID = "verisure";
     public static final String CLIMATESENSOR_ID = "climatesensor";
 
@@ -25,17 +26,18 @@ public class VerisureBindingConstants {
     public final static ThingTypeUID THING_TYPE_ALARM = new ThingTypeUID(BINDING_ID, "VerisureAlarm");
     public final static ThingTypeUID THING_TYPE_SMARTPLUG = new ThingTypeUID(BINDING_ID, "smartplug");
     public final static ThingTypeUID THING_TYPE_CLIMATESENSOR = new ThingTypeUID(BINDING_ID, "climatesensor");
+    public final static ThingTypeUID THING_TYPE_DOOR = new ThingTypeUID(BINDING_ID, DOOR);
 
     // List of all Channel ids
-    public final static String CHANNEL_ALARM_STATUS = "alarmstatus";
-    public final static String CHANNEL_ALARM_STATUS_NUMERIC = "alarmstatusnumeric";
+    public final static String CHANNEL_STATUS_NUMERIC = "statusnumeric";
     public final static String CHANNEL_TEMPERATURE = "temperature";
     public final static String CHANNEL_HUMIDITY = "humidity";
     public final static String CHANNEL_LASTUPDATE = "lastupdate";
+    public final static String CHANNEL_LOCATION = "location";
     public final static String CHANNEL_STATUS = "status";
 
-    public final static String CHANNEL_ALARMCHANGERNAME = "alarmchangername";
-    public final static String CHANNEL_ALARMTIMESTAMP = "alarmtimestamp";
+    public final static String CHANNEL_CHANGERNAME = "changername";
+    public final static String CHANNEL_TIMESTAMP = "timestamp";
 
     // REST URI constants
     public static final String USERNAME = "username";
