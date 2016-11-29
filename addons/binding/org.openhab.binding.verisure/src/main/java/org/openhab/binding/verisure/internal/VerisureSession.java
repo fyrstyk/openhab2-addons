@@ -13,6 +13,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.eclipse.smarthome.core.library.types.DecimalType;
@@ -198,13 +199,17 @@ public class VerisureSession {
         logger.debug("httpGetURL: " + urlString);
         String json = null;
 
+        HttpURLConnection conn = null;
         try {
             URL url = new URL(urlString);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn = (HttpURLConnection) url.openConnection();
             InputStream in = conn.getInputStream();
             BufferedReader reader = new BufferedReader(new InputStreamReader(in));
             int status = conn.getResponseCode();
-            logger.debug("Status = " + status);
+            String contentType = conn.getHeaderField("Content-Type");
+
+            logger.debug("Status code:{} contentType:{} ", status, contentType);
+
             // String key;
             // logger.debug("Headers-------start-----");
             // for (int i = 1; (key = conn.getHeaderFieldKey(i)) != null; i++) {
@@ -220,10 +225,14 @@ public class VerisureSession {
                 json += inputLine;
             }
             // logger.debug("Content-------end-----");
-            logger.debug(json);
+            logger.debug("Received content: {}", json);
             in.close();
         } catch (Exception e) {
             logger.error("Failed when talking to myverisure", e);
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
         }
 
         return json;
@@ -303,7 +312,10 @@ public class VerisureSession {
 
             conn.setInstanceFollowRedirects(false);
             conn.connect();
-
+            Map<String, List<String>> headers = conn.getHeaderFields();
+            for (String header : headers.keySet()) {
+                logger.debug("Response header {}: value {}", header, headers.get(header));
+            }
             int status = conn.getResponseCode();
 
             switch (status) {

@@ -16,7 +16,6 @@ import org.openhab.binding.verisure.handler.VerisureBridgeHandler;
 import org.openhab.binding.verisure.handler.VerisureObjectHandler;
 import org.openhab.binding.verisure.internal.VerisureAlarmJSON;
 import org.openhab.binding.verisure.internal.VerisureBaseObjectJSON;
-import org.openhab.binding.verisure.internal.VerisureSensorJSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,38 +64,10 @@ public class VerisureObjectDiscoveryService extends AbstractDiscoveryService {
         ThingUID thingUID = getThingUID(value);
         if (thingUID != null) {
             ThingUID bridgeUID = verisureBridgeHandler.getThing().getUID();
-            Map<String, Object> properties = new HashMap<>(1);
-            properties.put(DOOR, value.getId());
-
-            DiscoveryResult discoveryResult = DiscoveryResultBuilder.create(thingUID).withProperties(properties)
-                    .withBridge(bridgeUID).withLabel(value.getLocation()).build();
+            DiscoveryResult discoveryResult = DiscoveryResultBuilder.create(thingUID).withBridge(bridgeUID)
+                    .withLabel(value.getLocation()).build();
 
             logger.debug("thinguid: " + thingUID.toString());
-            logger.debug("withproperties: " + properties.toString());
-            logger.debug("with bridgeuid: " + bridgeUID);
-            logger.debug("with label: " + value.getName());
-
-            logger.debug("thingDiscovered: " + discoveryResult);
-            thingDiscovered(discoveryResult);
-        } else {
-            logger.debug("discovered unsupported light of type '{}' with id {}", value.getId(), value.getId());
-        }
-
-    }
-
-    private void onObjectAddedInternal(VerisureSensorJSON value) {
-        logger.debug("VerisureObjectDiscoveryService:OnObjectAddedInternal");
-        ThingUID thingUID = getThingUID(value);
-        if (thingUID != null) {
-            ThingUID bridgeUID = verisureBridgeHandler.getThing().getUID();
-            Map<String, Object> properties = new HashMap<>(1);
-            properties.put(CLIMATESENSOR_ID, value.getId());
-
-            DiscoveryResult discoveryResult = DiscoveryResultBuilder.create(thingUID).withProperties(properties)
-                    .withBridge(bridgeUID).withLabel(value.getLocation()).build();
-
-            logger.debug("thinguid: " + thingUID.toString());
-            logger.debug("withproperties: " + properties.toString());
             logger.debug("with bridgeuid: " + bridgeUID);
             logger.debug("with label: " + value.getName());
 
