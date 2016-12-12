@@ -8,13 +8,12 @@ import java.util.concurrent.ScheduledFuture;
 import org.eclipse.smarthome.core.library.types.DecimalType;
 import org.eclipse.smarthome.core.library.types.PercentType;
 import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.thing.Bridge;
 import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.ThingStatus;
+import org.eclipse.smarthome.core.thing.ThingStatusInfo;
 import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.RefreshType;
 import org.openhab.binding.verisure.internal.DeviceStatusListener;
@@ -41,6 +40,7 @@ public class VerisureObjectHandler extends BaseThingHandler implements DeviceSta
 
     public VerisureObjectHandler(Thing thing) {
         super(thing);
+        this.id = thing.getUID().getId();
 
     }
 
@@ -54,15 +54,20 @@ public class VerisureObjectHandler extends BaseThingHandler implements DeviceSta
 
     @Override
     public void initialize() {
-        this.id = getThing().getUID().getId();
+        // Do not go online
+        if (getBridge() != null) {
+            this.bridgeStatusChanged(getBridge().getStatusInfo());
+        }
     }
 
     @Override
-    public void bridgeHandlerInitialized(ThingHandler thingHandler, Bridge bridge) {
-        VerisureBridgeHandler vbh = (VerisureBridgeHandler) this.getBridge().getHandler();
-        session = vbh.getSession();
-        update(session.getVerisureObject(this.id));
-        super.initialize();
+    public void bridgeStatusChanged(ThingStatusInfo bridgeStatusInfo) {
+        if (bridgeStatusInfo.getStatus() == ThingStatus.ONLINE) {
+            VerisureBridgeHandler vbh = (VerisureBridgeHandler) this.getBridge().getHandler();
+            session = vbh.getSession();
+            update(session.getVerisureObject(this.id));
+        }
+        super.bridgeStatusChanged(bridgeStatusInfo);
     }
 
     public synchronized void update(VerisureBaseObjectJSON object) {
