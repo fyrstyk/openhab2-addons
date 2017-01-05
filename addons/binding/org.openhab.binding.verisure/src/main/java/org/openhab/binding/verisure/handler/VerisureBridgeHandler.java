@@ -19,7 +19,9 @@ import org.eclipse.smarthome.config.core.Configuration;
 import org.eclipse.smarthome.core.library.types.StringType;
 import org.eclipse.smarthome.core.thing.Bridge;
 import org.eclipse.smarthome.core.thing.ChannelUID;
+import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.ThingStatus;
+import org.eclipse.smarthome.core.thing.ThingStatusDetail;
 import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.eclipse.smarthome.core.thing.binding.BaseBridgeHandler;
 import org.eclipse.smarthome.core.types.Command;
@@ -36,6 +38,20 @@ import org.slf4j.LoggerFactory;
  * @author l3rum - Initial contribution
  */
 public class VerisureBridgeHandler extends BaseBridgeHandler {
+
+    @Override
+    protected void updateThing(Thing thing) {
+        // TODO Auto-generated method stub
+        super.updateThing(thing);
+    }
+
+    @Override
+    protected void updateConfiguration(Configuration configuration) {
+        // TODO Auto-generated method stub
+        stopAutomaticRefresh();
+        super.updateConfiguration(configuration);
+        initialize();
+    }
 
     public final static Set<ThingTypeUID> SUPPORTED_THING_TYPES = Collections.singleton(THING_TYPE_BRIDGE);
 
@@ -59,6 +75,8 @@ public class VerisureBridgeHandler extends BaseBridgeHandler {
                     updateStatus(ThingStatus.ONLINE);
                     updateAlarmState();
 
+                } else {
+                    updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR);
                 }
             } catch (Exception e) {
                 logger.debug("Exception occurred during execution: {}", e.getMessage(), e);
@@ -69,7 +87,7 @@ public class VerisureBridgeHandler extends BaseBridgeHandler {
 
     public VerisureBridgeHandler(Bridge bridge) {
         super(bridge);
-        // TODO Auto-generated constructor stub
+        session = new VerisureSession();
     }
 
     @Override
@@ -141,24 +159,31 @@ public class VerisureBridgeHandler extends BaseBridgeHandler {
             // let's go for the default
             logger.error("Could not get authentication String");
             // Failed init. Return
-
             return;
         }
         try {
-            session = new VerisureSession();
+
             session.initialize(authstring);
-            updateStatus(ThingStatus.ONLINE);
+
             startAutomaticRefresh();
         } catch (Error e) {
             logger.error("Failed", e);
+            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR, e.getMessage());
+        }
+    }
 
+    private void stopAutomaticRefresh() {
+        if (refreshJob != null && !refreshJob.isCancelled()) {
+            refreshJob.cancel(true);
+            refreshJob = null;
         }
     }
 
     private void startAutomaticRefresh() {
-
-        logger.debug("Scheduling at fixed rate");
-        refreshJob = scheduler.scheduleAtFixedRate(pollingRunnable, 30, refresh.intValue(), TimeUnit.SECONDS);
+        if (refreshJob == null || refreshJob.isCancelled()) {
+            logger.debug("Scheduling at fixed rate");
+            refreshJob = scheduler.scheduleAtFixedRate(pollingRunnable, 30, refresh.intValue(), TimeUnit.SECONDS);
+        }
     }
 
     @Override

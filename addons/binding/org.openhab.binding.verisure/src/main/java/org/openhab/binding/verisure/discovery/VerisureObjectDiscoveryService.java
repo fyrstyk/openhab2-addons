@@ -48,13 +48,6 @@ public class VerisureObjectDiscoveryService extends AbstractDiscoveryService {
                 .getVerisureObjects();
 
         for (Map.Entry<String, VerisureBaseObjectJSON> entry : verisureObjects.entrySet()) {
-
-            System.out.println(
-                    "Checking if " + entry.getValue().getId() + " with Key: " + entry.getKey() + "is a thing!");
-
-            String test = entry.getValue().getId().trim();
-            System.out.println("check if we can get object based on copy of key:" + verisureObjects.get(test));
-
             onObjectAddedInternal(entry.getValue());
         }
     }

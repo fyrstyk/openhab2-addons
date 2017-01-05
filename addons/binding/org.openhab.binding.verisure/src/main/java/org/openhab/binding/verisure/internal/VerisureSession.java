@@ -210,12 +210,6 @@ public class VerisureSession {
 
             logger.debug("Status code:{} contentType:{} ", status, contentType);
 
-            // String key;
-            // logger.debug("Headers-------start-----");
-            // for (int i = 1; (key = conn.getHeaderFieldKey(i)) != null; i++) {
-            // logger.debug(key + ":" + conn.getHeaderField(i));
-            // }
-            // logger.debug("Headers-------end-----");
             logger.debug("Content-------start-----");
             String inputLine;
             json = "";
@@ -358,8 +352,7 @@ public class VerisureSession {
                 try {
                     Thread.sleep(2000);
                 } catch (InterruptedException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    logger.warn("Interupted waiting for new login ", e);
                 }
                 logIn();
             }
