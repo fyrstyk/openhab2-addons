@@ -16,7 +16,6 @@
             <channel id="timestamp" typeId="timestamp"/>
             <channel id="changername" typeId="changername"/>
             <channel id="setstatus" typeId="setstatus"/>
-            
         </channels>
         
        <config-description>
@@ -90,19 +89,13 @@
   
     </thing-type>
 
-
-
-
     
-    
- 
      <channel-type id="status">
         <item-type>String</item-type>
         <label>Current Status</label>
         <description>Current  Status Channel</description>
     </channel-type>
-    
-         <channel-type id="statusnumeric">
+    <channel-type id="statusnumeric">
         <item-type>Number</item-type>
         <label>Current Status Numeric</label>
         <description>Current Status Numeric Channel</description>

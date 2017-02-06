@@ -39,6 +39,8 @@ import org.slf4j.LoggerFactory;
  */
 public class VerisureBridgeHandler extends BaseBridgeHandler {
 
+    private static final int REFRESH_DELAY = 10;
+
     @Override
     protected void updateThing(Thing thing) {
         // TODO Auto-generated method stub
@@ -61,6 +63,7 @@ public class VerisureBridgeHandler extends BaseBridgeHandler {
     private String authstring;
 
     ScheduledFuture<?> refreshJob;
+    ScheduledFuture<?> immediateRefreshJob;
 
     private VerisureSession session = null;
 
@@ -92,9 +95,10 @@ public class VerisureBridgeHandler extends BaseBridgeHandler {
 
     @Override
     public void handleCommand(ChannelUID channelUID, Command command) {
-        logger.error("Supposed to handle a command" + command.toString());
+        logger.info("Supposed to handle a command {} ", command);
         if (command instanceof RefreshType) {
             updateAlarmState();
+            scheduleImmediateRefresh();
         } else if (channelUID.getId().equals(CHANNEL_STATUS_NUMERIC)) {
 
             if (command.toString().equals("0")) {
@@ -116,6 +120,18 @@ public class VerisureBridgeHandler extends BaseBridgeHandler {
             } else {
                 logger.debug("unknown command!");
             }
+        } else {
+            logger.warn("unknown command! {}", command);
+        }
+    }
+
+    private void scheduleImmediateRefresh() {
+        // We schedule in 10 sec, to avoid multiple updates
+        logger.debug("Current remaining delay {}", refreshJob.getDelay(TimeUnit.SECONDS));
+        if (refreshJob.getDelay(TimeUnit.SECONDS) > REFRESH_DELAY) {
+            if (immediateRefreshJob == null || immediateRefreshJob.isDone()) {
+                immediateRefreshJob = scheduler.schedule(pollingRunnable, REFRESH_DELAY, TimeUnit.SECONDS);
+            }
         }
     }
 
@@ -125,15 +141,6 @@ public class VerisureBridgeHandler extends BaseBridgeHandler {
 
     @Override
     public void initialize() {
-        // TODO: Initialize the thing. If done set status to ONLINE to indicate proper working.
-        // Long running initialization should be done asynchronously in background.
-
-        // Note: When initialization can NOT be done set the status with more details for further
-        // analysis. See also class ThingStatusDetail for all available status details.
-        // Add a description to give user information to understand why thing does not work
-        // as expected. E.g.
-        // updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR,
-        // "Can not access device as username and/or password are invalid");
 
         logger.debug("Initializing Verisure Binding");
         Configuration config = getThing().getConfiguration();
@@ -182,7 +189,8 @@ public class VerisureBridgeHandler extends BaseBridgeHandler {
     private void startAutomaticRefresh() {
         if (refreshJob == null || refreshJob.isCancelled()) {
             logger.debug("Scheduling at fixed rate");
-            refreshJob = scheduler.scheduleAtFixedRate(pollingRunnable, 30, refresh.intValue(), TimeUnit.SECONDS);
+            refreshJob = scheduler.scheduleAtFixedRate(pollingRunnable, REFRESH_DELAY, refresh.intValue(),
+                    TimeUnit.SECONDS);
         }
     }
 
@@ -205,17 +213,21 @@ public class VerisureBridgeHandler extends BaseBridgeHandler {
      *
      */
     private void updateAlarmState() {
-        ChannelUID cuid = new ChannelUID(getThing().getUID(), CHANNEL_STATUS);
-        updateState(cuid, session.getAlarmStatus());
+        try {
+            ChannelUID cuid = new ChannelUID(getThing().getUID(), CHANNEL_STATUS);
+            updateState(cuid, session.getAlarmStatus());
 
-        logger.debug("alarmstatusnumeric is: " + session.getAlarmStatusNumeric());
-        cuid = new ChannelUID(getThing().getUID(), CHANNEL_STATUS_NUMERIC);
-        updateState(cuid, session.getAlarmStatusNumeric());
+            logger.debug("alarmstatusnumeric is: " + session.getAlarmStatusNumeric());
+            cuid = new ChannelUID(getThing().getUID(), CHANNEL_STATUS_NUMERIC);
+            updateState(cuid, session.getAlarmStatusNumeric());
 
-        cuid = new ChannelUID(getThing().getUID(), CHANNEL_CHANGERNAME);
-        updateState(cuid, session.getAlarmChangerName());
+            cuid = new ChannelUID(getThing().getUID(), CHANNEL_CHANGERNAME);
+            updateState(cuid, session.getAlarmChangerName());
 
-        cuid = new ChannelUID(getThing().getUID(), CHANNEL_TIMESTAMP);
-        updateState(cuid, session.getAlarmTimestamp());
+            cuid = new ChannelUID(getThing().getUID(), CHANNEL_TIMESTAMP);
+            updateState(cuid, session.getAlarmTimestamp());
+        } catch (Exception e) {
+            logger.error("Failed to update state ", e);
+        }
     }
 }
