@@ -539,12 +539,43 @@ public class VerisureSensorJSON extends VerisureBaseObjectJSON {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see java.lang.Object#toString()
      */
     @Override
     public String toString() {
-        return "VerisureSensorJSON [temperature=" + temperature + ", humidity=" + humidity + ", location=" + location
-                + ", timestamp=" + timestamp + ", id=" + id + ", label=" + label + ", status=" + status + "]";
+        StringBuilder builder = new StringBuilder();
+        builder.append("VerisureSensorJSON [");
+        if (temperature != null) {
+            builder.append("temperature=");
+            builder.append(temperature);
+            builder.append(", ");
+        }
+        if (humidity != null) {
+            builder.append("humidity=");
+            builder.append(humidity);
+            builder.append(", ");
+        }
+        if (timestamp != null) {
+            builder.append("timestamp=");
+            builder.append(timestamp);
+            builder.append(", ");
+        }
+        if (date != null) {
+            builder.append("date=");
+            builder.append(date);
+            builder.append(", ");
+        }
+        if (id != null) {
+            builder.append("id=");
+            builder.append(id);
+            builder.append(", ");
+        }
+        if (location != null) {
+            builder.append("location=");
+            builder.append(location);
+        }
+        builder.append("]");
+        return builder.toString();
     }
 }

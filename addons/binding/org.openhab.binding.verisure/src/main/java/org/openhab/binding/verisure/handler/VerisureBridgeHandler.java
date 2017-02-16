@@ -197,10 +197,7 @@ public class VerisureBridgeHandler extends BaseBridgeHandler {
     @Override
     public void dispose() {
         logger.debug("Handler disposed.");
-        if (refreshJob != null && !refreshJob.isCancelled()) {
-            refreshJob.cancel(true);
-            refreshJob = null;
-        }
+        stopAutomaticRefresh();
         session.dispose();
         session = null;
     }
@@ -230,4 +227,15 @@ public class VerisureBridgeHandler extends BaseBridgeHandler {
             logger.error("Failed to update state ", e);
         }
     }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.eclipse.smarthome.core.thing.binding.BaseThingHandler#handleRemoval()
+     */
+    @Override
+    public void handleRemoval() {
+        stopAutomaticRefresh();
+    }
+
 }

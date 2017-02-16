@@ -71,11 +71,11 @@ public class VerisureObjectHandler extends BaseThingHandler implements DeviceSta
     }
 
     public synchronized void update(VerisureBaseObjectJSON object) {
-        logger.debug("VerisureObjectHandler:update()");
+        logger.trace("VerisureObjectHandler:update()");
 
         if (getThing().getThingTypeUID().equals(THING_TYPE_CLIMATESENSOR)) {
-            logger.debug("this is a climate sensor");
-            logger.debug("getid: " + getThing().getUID().getId());
+            logger.trace("this is a climate sensor");
+            logger.trace("getid: " + getThing().getUID().getId());
             VerisureSensorJSON obj = (VerisureSensorJSON) object;
             updateStatus(ThingStatus.ONLINE);
             updateSensorState(obj);
@@ -85,7 +85,7 @@ public class VerisureObjectHandler extends BaseThingHandler implements DeviceSta
             updateStatus(ThingStatus.ONLINE);
             updateDoorState(obj);
         } else {
-            logger.debug("cant handle this thingtypeuid: " + getThing().getThingTypeUID());
+            logger.warn("cant handle this thingtypeuid: {}", getThing().getThingTypeUID());
 
         }
 
@@ -98,7 +98,7 @@ public class VerisureObjectHandler extends BaseThingHandler implements DeviceSta
         ChannelUID loid = new ChannelUID(getThing().getUID(), CHANNEL_LOCATION);
         String val;
         val = obj.getTemperature().substring(0, obj.getTemperature().length() - 6).replace(",", ".");
-        logger.debug("Val is: " + val);
+        logger.trace("Val is: " + val);
 
         DecimalType number = new DecimalType(val);
         updateState(cuid, number);

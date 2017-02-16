@@ -106,4 +106,46 @@ public class VerisureAlarmJSON extends VerisureBaseObjectJSON {
         return true;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("VerisureAlarmJSON [");
+        if (date != null) {
+            builder.append("date=");
+            builder.append(date);
+            builder.append(", ");
+        }
+        if (name != null) {
+            builder.append("name=");
+            builder.append(name);
+            builder.append(", ");
+        }
+        if (id != null) {
+            builder.append("id=");
+            builder.append(id);
+            builder.append(", ");
+        }
+        if (label != null) {
+            builder.append("label=");
+            builder.append(label);
+            builder.append(", ");
+        }
+        if (location != null) {
+            builder.append("location=");
+            builder.append(location);
+            builder.append(", ");
+        }
+        if (status != null) {
+            builder.append("status=");
+            builder.append(status);
+        }
+        builder.append("]");
+        return builder.toString();
+    }
+
 }

@@ -13,7 +13,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.eclipse.smarthome.core.library.types.DecimalType;
@@ -69,16 +68,19 @@ public class VerisureSession {
 
         // Get JSON
         String result = httpGet(BASEURL + CLIMATEDATA_PATH);
-        logger.debug("Data:" + result);
+        logger.trace("Data:" + result);
         VerisureSensorJSON[] sensors = gson.fromJson(result, VerisureSensorJSON[].class);
-        logger.debug("Sensor:" + sensors);
+        logger.trace("Sensor:" + sensors);
         for (VerisureSensorJSON cse : sensors) {
             cse.setId(cse.getId().replaceAll("[^a-zA-Z0-9_]", "_"));
-            logger.debug(cse.getId());
+            logger.trace(cse.getId());
             VerisureBaseObjectJSON oldObj = verisureObjects.get(cse.getId());
-            if (oldObj == null || oldObj.equals(cse)) {
+            if (oldObj == null || !oldObj.equals(cse)) {
+                logger.debug("Sensor data Changed {}", cse.toString());
                 verisureObjects.put(cse.getId(), cse);
                 notifyListeners(cse);
+            } else {
+                logger.debug("Sensor data NOT Changed {}", cse.toString());
             }
 
             // Should probably check if any of the items have been updated and notify caller
@@ -158,7 +160,7 @@ public class VerisureSession {
     }
 
     public synchronized void updateAlarmStatus() {
-        logger.debug("VerisureSession:updateAlarmStatus");
+        logger.trace("VerisureSession:updateAlarmStatus");
 
         // Get JSON
         String result = httpGet(BASEURL + ALARMSTATUS_PATH);
@@ -181,16 +183,22 @@ public class VerisureSession {
 
     private void setAlarmData(VerisureAlarmJSON object) {
         if (!object.equals(alarmData)) {
+            logger.debug("Alarm data Updated {}", object.toString());
             this.alarmData = object;
             notifyListeners(alarmData);
+        } else {
+            logger.debug("Alarm data Not Changed {}", object.toString());
         }
     }
 
     private void setDoorData(VerisureAlarmJSON object) {
         if (!object.equals(doorData)) {
+            logger.debug("Door data Updated {}", object.toString());
             this.doorData = object;
             this.verisureObjects.put(doorData.getId(), this.doorData);
             notifyListeners(doorData);
+        } else {
+            logger.debug("Door data Not Changed {}", object.toString());
         }
     }
 
@@ -210,7 +218,7 @@ public class VerisureSession {
 
             logger.debug("Status code:{} contentType:{} ", status, contentType);
 
-            logger.debug("Content-------start-----");
+            logger.trace("Content-------start-----");
             String inputLine;
             json = "";
 
@@ -219,7 +227,7 @@ public class VerisureSession {
                 json += inputLine;
             }
             // logger.debug("Content-------end-----");
-            logger.debug("Received content: {}", json);
+            logger.trace("Received content: {}", json);
             in.close();
         } catch (Exception e) {
             logger.error("Failed when talking to myverisure", e);
@@ -245,7 +253,7 @@ public class VerisureSession {
         source = httpGet(url);
         csrf = getCsrfToken2(source);
 
-        logger.debug("Got CSRF: " + csrf);
+        logger.trace("Got CSRF: " + csrf);
         return;
     }
 
@@ -280,17 +288,17 @@ public class VerisureSession {
             // logger.debug(key + ":" + conn.getHeaderField(i));
             // }
             // logger.debug("Headers-------end-----");
-            logger.debug("Content-------start-----");
+            logger.trace("Content-------start-----");
             String inputLine;
             while ((inputLine = reader.readLine()) != null) {
-                logger.debug(inputLine);
+                logger.trace(inputLine);
             }
-            logger.debug("Content-------end-----");
+            logger.trace("Content-------end-----");
             in.close();
 
             return inputLine;
         } catch (Exception e) {
-            logger.debug("had an exception" + e.toString());
+            logger.warn("had an exception" + e.toString());
         }
         return null;
     }
@@ -306,10 +314,10 @@ public class VerisureSession {
 
             conn.setInstanceFollowRedirects(false);
             conn.connect();
-            Map<String, List<String>> headers = conn.getHeaderFields();
-            for (String header : headers.keySet()) {
-                logger.debug("Response header {}: value {}", header, headers.get(header));
-            }
+            // Map<String, List<String>> headers = conn.getHeaderFields();
+            // for (String header : headers.keySet()) {
+            // logger.debug("Response header {}: value {}", header, headers.get(header));
+            // }
             int status = conn.getResponseCode();
 
             switch (status) {
@@ -335,7 +343,7 @@ public class VerisureSession {
             }
 
         } catch (Exception e) {
-            logger.debug("Error:" + e);
+            logger.warn("Error:" + e);
         }
 
         return false;
