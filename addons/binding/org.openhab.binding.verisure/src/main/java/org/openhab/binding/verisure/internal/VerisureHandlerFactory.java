@@ -45,9 +45,6 @@ public class VerisureHandlerFactory extends BaseThingHandlerFactory {
 
     @Override
     public boolean supportsThingType(ThingTypeUID thingTypeUID) {
-        logger.debug("supportThingType(" + thingTypeUID.getAsString() + ")");
-
-        logger.debug("bool: " + SUPPORTED_THING_TYPES.contains(thingTypeUID));
         return SUPPORTED_THING_TYPES.contains(thingTypeUID);
     }
 

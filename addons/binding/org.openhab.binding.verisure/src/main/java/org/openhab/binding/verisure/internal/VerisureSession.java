@@ -31,7 +31,7 @@ public class VerisureSession {
     private Logger logger = LoggerFactory.getLogger(VerisureSession.class);
     private String authstring;
     private String csrf;
-
+    private String pinCode;
     private VerisureAlarmJSON alarmData = null;
     private CookieManager cm = new CookieManager();
     private Gson gson = new GsonBuilder().create();
@@ -40,11 +40,11 @@ public class VerisureSession {
 
     private List<DeviceStatusListener> deviceStatusListeners = new CopyOnWriteArrayList<>();
 
-    public void initialize(String _authstring) {
+    public void initialize(String _authstring, String pinCode) {
         logger.debug("VerisureSession:initialize");
 
-        authstring = _authstring.substring(0);
-
+        this.authstring = _authstring.substring(0);
+        this.pinCode = pinCode;
         // CookieHandler keeps us logged in
         cm.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
         CookieHandler.setDefault(cm);
@@ -393,7 +393,17 @@ public class VerisureSession {
         logger.debug("Sending command to disarm the alarm!");
 
         String url = BASEURL + ALARM_COMMAND;
-        String data = "code=1000&state=DISARMED";
+        String data = "code=" + pinCode + "&state=DISARMED";
+
+        sendHTTPpost(url, data);
+        return true;
+    }
+
+    public boolean lockDoor(String door) {
+        logger.debug("Sending command to disarm the alarm!");
+
+        String url = BASEURL + LOCK_COMMAND;
+        String data = "code=" + pinCode + "&state=LOCKED&deviceLabel=" + door + "&_csrf=" + csrf;
 
         sendHTTPpost(url, data);
         return true;
@@ -403,7 +413,7 @@ public class VerisureSession {
         logger.debug("Sending command to arm_home the alarm!");
 
         String url = BASEURL + ALARM_COMMAND;
-        String data = "code=1000&state=ARMED_HOME";
+        String data = "code=" + pinCode + "&state=ARMED_HOME";
 
         sendHTTPpost(url, data);
         return true;
@@ -413,7 +423,7 @@ public class VerisureSession {
         logger.debug("Sending command to arm_away the alarm!");
 
         String url = BASEURL + ALARM_COMMAND;
-        String data = "code=1000&state=ARMED_AWAY";
+        String data = "code=" + pinCode + "&state=ARMED_AWAY";
 
         sendHTTPpost(url, data);
         return true;
@@ -455,6 +465,20 @@ public class VerisureSession {
             // onUpdate();
         }
         return result;
+    }
+
+    public boolean unLockDoor(String door) {
+        logger.debug("Sending command to disarm the alarm!");
+
+        String url = BASEURL + LOCK_COMMAND;
+        String data = "code=" + pinCode + "&state=UNLOCKED&deviceLabel=" + door + "&_csrf=" + csrf;
+
+        sendHTTPpost(url, data);
+        return true;
+    }
+
+    public VerisureAlarmJSON getAlarmObject() {
+        return alarmData;
     }
 
 }

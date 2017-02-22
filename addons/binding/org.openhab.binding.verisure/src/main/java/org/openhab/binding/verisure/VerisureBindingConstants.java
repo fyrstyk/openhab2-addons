@@ -35,6 +35,8 @@ public class VerisureBindingConstants {
     public final static String CHANNEL_LASTUPDATE = "lastupdate";
     public final static String CHANNEL_LOCATION = "location";
     public final static String CHANNEL_STATUS = "status";
+    public final static String CHANNEL_SETSTATUS = "setstatus";
+    public static final String CHANNEL_STATUS_LOCALIZED = "alarmstatuslocalized";
 
     public final static String CHANNEL_CHANGERNAME = "changername";
     public final static String CHANNEL_TIMESTAMP = "timestamp";
@@ -45,6 +47,7 @@ public class VerisureBindingConstants {
     public static final String BASEURL = "https://mypages.verisure.com";
     public static final String LOGON_SUF = "/j_spring_security_check?locale=en_GB";
     public static final String ALARM_COMMAND = "/remotecontrol/armstatechange.cmd";
+    public static final String LOCK_COMMAND = "/remotecontrol/lockunlock.cmd";
     public static final String START_SUF = "/uk/start.html";
 
     public static final String ALARMSTATUS_PATH = "/remotecontrol?_=";

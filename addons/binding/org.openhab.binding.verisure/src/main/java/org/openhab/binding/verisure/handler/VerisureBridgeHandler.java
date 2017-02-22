@@ -61,7 +61,7 @@ public class VerisureBridgeHandler extends BaseBridgeHandler {
 
     private BigDecimal refresh;
     private String authstring;
-
+    private String pinCode;
     ScheduledFuture<?> refreshJob;
     ScheduledFuture<?> immediateRefreshJob;
 
@@ -98,30 +98,33 @@ public class VerisureBridgeHandler extends BaseBridgeHandler {
         logger.info("Supposed to handle a command {} ", command);
         if (command instanceof RefreshType) {
             updateAlarmState();
-            scheduleImmediateRefresh();
-        } else if (channelUID.getId().equals(CHANNEL_STATUS_NUMERIC)) {
-
-            if (command.toString().equals("0")) {
-                logger.debug("attempting to turn off alarm!");
-                session.disarmAlarm();
-                ChannelUID cuid = new ChannelUID(getThing().getUID(), CHANNEL_STATUS);
-                updateState(cuid, new StringType("pending"));
-            } else if (command.toString().equals("1")) {
-                logger.debug("arming at home");
-                session.armHomeAlarm();
-                ChannelUID cuid = new ChannelUID(getThing().getUID(), CHANNEL_STATUS);
-                updateState(cuid, new StringType("pending"));
-
-            } else if (command.toString().equals("2")) {
-                logger.debug("arming away!");
-                session.armAwayAlarm();
-                ChannelUID cuid = new ChannelUID(getThing().getUID(), CHANNEL_STATUS);
-                updateState(cuid, new StringType("pending"));
-            } else {
-                logger.debug("unknown command!");
-            }
+        } else if (channelUID.getId().equals(CHANNEL_SETSTATUS)) {
+            handleChangeAlarmState(command);
         } else {
             logger.warn("unknown command! {}", command);
+        }
+        scheduleImmediateRefresh();
+    }
+
+    private void handleChangeAlarmState(Command command) {
+        if (command.toString().equals("0")) {
+            logger.debug("attempting to turn off alarm!");
+            session.disarmAlarm();
+            ChannelUID cuid = new ChannelUID(getThing().getUID(), CHANNEL_STATUS);
+            updateState(cuid, new StringType("pending"));
+        } else if (command.toString().equals("1")) {
+            logger.debug("arming at home");
+            session.armHomeAlarm();
+            ChannelUID cuid = new ChannelUID(getThing().getUID(), CHANNEL_STATUS);
+            updateState(cuid, new StringType("pending"));
+
+        } else if (command.toString().equals("2")) {
+            logger.debug("arming away!");
+            session.armAwayAlarm();
+            ChannelUID cuid = new ChannelUID(getThing().getUID(), CHANNEL_STATUS);
+            updateState(cuid, new StringType("pending"));
+        } else {
+            logger.debug("unknown command!");
         }
     }
 
@@ -168,9 +171,21 @@ public class VerisureBridgeHandler extends BaseBridgeHandler {
             // Failed init. Return
             return;
         }
+        // Get auth string
+        try {
+            pinCode = (String) config.get("pin");
+        } catch (Exception e) {
+        }
+
+        if (pinCode == null) {
+            // let's go for the default
+            logger.error("Could not get pinCode String");
+            // Failed init. Return
+            return;
+        }
         try {
 
-            session.initialize(authstring);
+            session.initialize(authstring, pinCode);
 
             startAutomaticRefresh();
         } catch (Error e) {
@@ -223,6 +238,9 @@ public class VerisureBridgeHandler extends BaseBridgeHandler {
 
             cuid = new ChannelUID(getThing().getUID(), CHANNEL_TIMESTAMP);
             updateState(cuid, session.getAlarmTimestamp());
+
+            cuid = new ChannelUID(getThing().getUID(), CHANNEL_STATUS_LOCALIZED);
+            updateState(cuid, new StringType(session.getAlarmObject().getLabel()));
         } catch (Exception e) {
             logger.error("Failed to update state ", e);
         }

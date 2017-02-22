@@ -16,6 +16,7 @@ import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.RefreshType;
+import org.openhab.binding.verisure.VerisureBindingConstants;
 import org.openhab.binding.verisure.internal.DeviceStatusListener;
 import org.openhab.binding.verisure.internal.VerisureAlarmJSON;
 import org.openhab.binding.verisure.internal.VerisureBaseObjectJSON;
@@ -49,6 +50,33 @@ public class VerisureObjectHandler extends BaseThingHandler implements DeviceSta
         logger.debug("Supposed to handle command for object handler: " + command.toString());
         if (command instanceof RefreshType) {
             update(session.getVerisureObject(this.id));
+        } else if (channelUID.getId().equals(CHANNEL_SETSTATUS)) {
+            handleChangeDoorState(command);
+            session.refresh();
+        } else {
+            logger.warn("unknown command! {}", command);
+        }
+    }
+
+    private void handleChangeDoorState(Command command) {
+        if (command.toString().equals("0")) {
+            logger.debug("attempting to turn off alarm!");
+            session.unLockDoor(this.id);
+            ChannelUID cuid = new ChannelUID(getThing().getUID(), CHANNEL_STATUS);
+            updateState(cuid, new StringType("pending"));
+        } else if (command.toString().equals("1")) {
+            logger.debug("arming at home");
+            session.lockDoor(this.id);
+            ChannelUID cuid = new ChannelUID(getThing().getUID(), CHANNEL_STATUS);
+            updateState(cuid, new StringType("pending"));
+
+        } else if (command.toString().equals("2")) {
+            logger.debug("arming away!");
+            session.lockDoor(this.id);
+            ChannelUID cuid = new ChannelUID(getThing().getUID(), CHANNEL_STATUS);
+            updateState(cuid, new StringType("pending"));
+        } else {
+            logger.debug("unknown command!");
         }
     }
 
@@ -66,6 +94,7 @@ public class VerisureObjectHandler extends BaseThingHandler implements DeviceSta
             VerisureBridgeHandler vbh = (VerisureBridgeHandler) this.getBridge().getHandler();
             session = vbh.getSession();
             update(session.getVerisureObject(this.id));
+            vbh.registerObjectStatusListener(this);
         }
         super.bridgeStatusChanged(bridgeStatusInfo);
     }
@@ -125,6 +154,9 @@ public class VerisureObjectHandler extends BaseThingHandler implements DeviceSta
 
         cuid = new ChannelUID(getThing().getUID(), CHANNEL_LOCATION);
         updateState(cuid, new StringType(status.getLocation()));
+
+        cuid = new ChannelUID(getThing().getUID(), VerisureBindingConstants.CHANNEL_STATUS_LOCALIZED);
+        updateState(cuid, new StringType(status.getLabel()));
     }
 
     @Override
